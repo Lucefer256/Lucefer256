@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js">
+    </script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <style>
+        .quantity {
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            color: #212121;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        table,
+        td,
+        th {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        td {
+            border: 1px solid black;
+            align-items: center;
+        }
+
+        tr {
+            align-items: center;
+        }
+
+
+        tr:hover {
+            background-color: rgb(222, 255, 132);
+        }
+
+        div {
+            display: block;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-pay {
+            background-color: #C800Da;
+            border: 0;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .fa-ticket {
+            color: #0e1fa1;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="letter-spacing: 5mm; text-align: center; text-decoration: darkblue;">CART
+    </div>
+    <div class="container">
+        <table style="width:100%">
+            <thead>
+                <tr>
+                    <th>Items</th>
+                    <th>Price Details</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+
+            </tbody>
+            <tfoot>
+                <tr style="height: 60px;width: 100%;">
+                    <td><span>SUB TOTAL :</span></td>
+                    <td>
+
+                        <span id="total"></span>
+                    </td>
+
+                </tr>
+            </tfoot>
+        </table>
+
+        <a id="a-t-c" href="item.html" class="btn btn-primary" onclick="" >Back to Home Page</a>
+    </div>
+    <script>
+        var taxRate = 0.05;
+        var fadeTime = 300;
+        
+        var data = [
+
+
+        ]
+        data = JSON.parse(sessionStorage.getItem("cart"));
+        var cart1 = data
+        var cartdata=[]
+        
+        var fr = []
+        for (let i = 0; i < cart1.length; i++) {
+            let count = 1;
+            for (let j = i + 1; j < cart1.length; j++) {
+                if (cart1[i].id === cart1[j].id) {
+                    count++;
+                    //cart1[i].quantity +=1
+                    //To avoid counting same element again    
+                    fr[j] = "visited"
+                    cart1[j]="visited"
+                }
+            }
+            if (fr[i] != "visited"){
+                fr[i]=count
+                cart1[i].quantity=count
+                
+                console.log(cart1[i].quantity)
+                console.log(cart1)
+                
+            }
+            if (fr[i] == "visited")
+            delete cart1[i]
+        }
+        
+        console.log(cart1)
+        function render() {
+            var htmldata
+            for (x in cart1) {
+                idd= cart1[x].id
+                htmldata += `
+                    <tr id="item${x}">
+                                <td>
+                                    <span><img src=${cart1[x].imgurl} alt="" style="height: 120px;width: 100px; ;"></span>
+                                    <span style="position: absolute;">${cart1[x].name}<div id="burg" data-value="60">Rs. ${cart1[x].price}</div></span>
+                                    
+                                </td>
+                                <td>
+                                    <div>
+                                        
+                                        <div class="quantity" >
+                                            <button id="${x}" onclick="decrement(this)" data-item="${cart1[x].name}"> – </button>
+                                            <div class="2"><input type="text" class="_253qQJ" value=${cart1[x].quantity}></div>
+                                            <button id="${x}"onclick="increment(this)" data-item="${cart1[x].name}"> + </button>
+                                        </div>
+                                        <br>
+                                        <div id="amount">Rs. ${cart1[x].quantity * cart1[x].price}</div>
+                                        <br>
+                                        <div class="remove-item">
+                                            <button class="remove-product" onclick="removeItem(this)" id='${x}'>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>`
+            }
+            $('#tbody').html = ""
+            $('#tbody').html(htmldata)
+            $("#total").text("Rs." + total())
+            //$('.remove-product').click(function() {
+            //removeItem(this);
+            // console.log(this.id)
+            // });
+        }
+        $(document).ready(() => {
+            render()
+
+        })
+        function increment(e) {
+            let id = cart1.findIndex(item => item.name === e.dataset.item)
+
+            cart1[id].quantity += 1
+            render()
+        }
+        function decrement(e) {
+            let id = cart1.findIndex(item => item.name === e.dataset.item)
+            console.log(e)
+            if (cart1[id].quantity > 1) {
+                cart1[id].quantity -= 1
+                render()
+            }
+
+        }
+        function total() {
+            let total = 0
+            for (x in cart1) {
+                total += cart1[x].price * cart1[x].quantity
+            }
+
+            return total
+        }
+        function removeItem(e) {
+            /* Remove row from DOM and recalc cart total */
+
+
+            var id = "#item" + e.id
+            $(id).remove();
+            var index = cart1.findIndex(function (o) {
+
+                if (o.id == e.id) {
+                    console.log(o.id)
+                    return e.id
+                }
+            })
+            console.log('index' + index)
+            cart1.splice(index, 1);
+            console.log(cart1)
+            $("#total").text("Rs." + total())
+
+
+        }
+    </script>
+</body>
+
+</html>
